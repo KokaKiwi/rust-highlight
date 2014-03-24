@@ -6,3 +6,4 @@
 .*
 !.gitignore
 !.gitmodules
+!.travis.yml
