@@ -75,19 +75,32 @@ impl Backend for HtmlBackend {
             try!(w.write_str("<span"));
 
             if self.use_classes {
-                try!(write!(w, "class=\"{}\"", ty));
+                try!(write!(w, " class=\"{}\"", ty));
             } else {
-                let color = colors::get_color(ty).unwrap();
-                try!(write!(w, "style=\"color: \\#{};\"", color));
+                let color = colors::get_color(ty);
+                match color {
+                    Some(c) => {
+                        try!(write!(w, " style=\"color: \\#{};\"", c));
+                    }
+                    None => {}
+                }
             }
 
             try!(w.write_str(">"));
+        }
+
+        if ty == "attribute" {
+            try!(w.write_str("#"));
         }
 
         Ok(())
     }
 
     fn end(&mut self, w: &mut Writer, ty: &str) -> IoResult<()> {
+        if ty == "attribute" {
+            try!(w.write_str("]"));
+        }
+
         if ty != "" && ty != "normal" {
             try!(w.write_str("</span>"));
         }
