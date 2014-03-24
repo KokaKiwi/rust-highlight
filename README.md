@@ -1,6 +1,8 @@
 rust-highlight
 ==============
 
+Travis: [![Build Status](https://travis-ci.org/KokaKiwi/rust-highlight.svg?branch=master)](https://travis-ci.org/KokaKiwi/rust-highlight)
+
 rust-highlight is small Rust tool you can use to get highlighted Rust code in HTML, JSON, or any other implemented backend.
 Actually, the implemented backends are HTML and JSON.
 
