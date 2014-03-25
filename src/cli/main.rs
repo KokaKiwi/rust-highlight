@@ -2,9 +2,8 @@
 #[crate_type = "bin"];
 #[license = "MIT"];
 
-extern crate syntax;
-extern crate serialize;
 extern crate collections;
+extern crate highlight;
 
 use std::os;
 use std::io;
@@ -12,12 +11,9 @@ use std::str;
 
 use collections::HashMap;
 
-use backend::Backend;
-use core::{Start,End,Text};
-
-mod core;
-mod backend;
-mod colors;
+use highlight::{backend, core};
+use highlight::backend::Backend;
+use highlight::core::{Start,End,Text};
 
 struct Args {
     show_help: bool,

@@ -9,7 +9,7 @@ use colors;
 pub struct JsonBackend {
     pretty: bool,
 
-    entries: Vec<Entry>,
+    priv entries: Vec<Entry>,
 }
 
 #[deriving(Encodable)]
