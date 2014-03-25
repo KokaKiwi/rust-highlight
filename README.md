@@ -3,8 +3,8 @@ rust-highlight
 
 Travis: [![Build Status](https://travis-ci.org/KokaKiwi/rust-highlight.svg?branch=master)](https://travis-ci.org/KokaKiwi/rust-highlight)
 
-rust-highlight is small Rust tool you can use to get highlighted Rust code in HTML, JSON, or any other implemented backend.
-Actually, the implemented backends are HTML and JSON.
+rust-highlight is small Rust tool you can use to get highlighted Rust code in HTML, LaTeX, or any other implemented backend.
+Actually, the implemented backends are HTML, LaTeX and JSON.
 
 Installation
 ------------
@@ -28,14 +28,19 @@ Usage
 
 ~~~bash
 $ ./rshighlight -h
-Usage: ./rshighlight [options] [filename]
+Usage: Usage: ./rshighlight [-h] [-o FILENAME] [--header] [--html] [--json] [--latex] [-v KEY=VAL].. [filename]
 
-  -h --help          Show this help and exit.
-  -o --output        Output filename.
-  --header           Output head to put before highlighted code.
-  --html             Output HTML code.
-  --latex            Output LaTeX code.
-  -v --var KEY=VAL   Set backend-specific variables.
+    Small Rust tool to output highlighted Rust code.
+
+Options:
+    -h --help           Show this help and exit.
+    -o --output FILENAME
+                        Output filename.
+    --header            Output head to put before highlighted code.
+    --html              Output HTML code.
+    --json              Output JSON code.
+    --latex             Output LaTeX code.
+    -v --var KEY=VAL    Set backend-specific variables.
 ~~~
 
 ~~~bash
@@ -53,3 +58,7 @@ Backends options
 ### JSON
 
 - `pretty` (boolean): Output pretty JSON or not.
+
+### LaTeX
+
+There is no options actually.
