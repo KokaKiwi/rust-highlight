@@ -3,6 +3,7 @@
 #[license = "MIT"];
 
 extern crate collections;
+extern crate getopts;
 extern crate highlight;
 
 use std::os;
@@ -26,77 +27,62 @@ struct Args {
     filename: Option<~str>,
 }
 
-fn parse_args(argv: &[~str]) -> Result<Args, ~str> {
-    let mut args = Args {
-        show_help: false,
+fn parse_args(argv: &[~str], opts: &[getopts::OptGroup]) -> Result<Args, ~str> {
+    fn select_backend(matches: &getopts::Matches) -> Result<backend::BackendType, ~str> {
+        if matches.opt_present("html") {
+            Ok(backend::Html)
+        } else if matches.opt_present("json") {
+            Ok(backend::Json)
+        } else {
+            Ok(backend::Html)
+        }
+    }
 
-        backend: backend::Html,
-        backend_vars: HashMap::new(),
-
-        header: false,
-        output_filename: None,
-        filename: None,
+    let matches = match getopts::getopts(argv, opts) {
+        Ok(m) => m,
+        Err(f) => {
+            return Err(f.to_err_msg());
+        }
     };
 
-    let mut i = 0;
-    while i < argv.len() {
-        match argv[i].as_slice() {
-            "--help" | "-h" => {
-                args.show_help = true;
-            }
+    let mut args = Args {
+        show_help: matches.opt_present("help"),
 
-            "--output" | "-o" => {
-                args.output_filename = Some(argv[i + 1].to_owned());
-                i += 1;
+        backend: match select_backend(&matches) {
+            Ok(ty) => ty,
+            Err(e) => {
+                return Err(e);
             }
+        },
+        backend_vars: HashMap::new(),
 
-            "--html" => {
-                args.backend = backend::Html;
-            }
-
-            "--json" => {
-                args.backend = backend::Json;
-            }
-
-            "--header" => {
-                args.header = true;
-            }
-
-            "--var" | "-v" => {
-                let value = argv[i + 1].as_slice();
-                let parts: ~[&str] = value.splitn('=', 1).collect();
-                if parts.len() != 2 {
-                    return Err(format!("Bad backend variable format: {}", value));
-                }
-                let (name, value) = (parts[0], parts[1]);
-                args.backend_vars.insert(name.to_owned(), value.to_owned());
-                i += 1;
-            }
-
-            filename => {
-                if args.filename.is_some() {
-                    return Err(format!("Too much arguments: {}", filename));
-                }
-
-                args.filename = Some(filename.to_owned());
-            }
+        header: matches.opt_present("header"),
+        output_filename: matches.opt_str("output"),
+        filename: match matches.free.len() {
+            0 => None,
+            _ => Some(matches.free.get(0).to_owned()),
         }
+    };
 
-        i += 1;
+    for var in matches.opt_strs("var").iter() {
+        let value = var.as_slice();
+        let parts: ~[&str] = value.splitn('=', 1).collect();
+        if parts.len() != 2 {
+            return Err(format!("Bad backend variable format: {}", value));
+        }
+        let (name, value) = (parts[0], parts[1]);
+        args.backend_vars.insert(name.to_owned(), value.to_owned());
     }
 
     Ok(args)
 }
 
-fn print_usage(program: &str) {
-    println!("Usage: {} [options] [filename]", program);
+static BRIEF: &'static str = "Small Rust tool to output highlighted Rust code.";
+
+fn print_usage(program: &str, opts: &[getopts::OptGroup]) {
+    println!("Usage: {} [filename]", getopts::short_usage(program, opts));
     println!("");
-    println!("  -h --help          Show this help and exit.");
-    println!("  -o --output        Output filename.");
-    println!("  --header           Output head to put before highlighted code.");
-    println!("  --html             Output HTML code.");
-    println!("  --latex            Output LaTeX code.");
-    println!("  -v --var KEY=VAL   Set backend-specific variables.");
+    println!("    {}", getopts::usage(BRIEF, opts));
 }
 
 #[allow(unused_must_use)]
@@ -104,16 +90,25 @@ fn main() {
     let mut argv = os::args();
     let program = argv.shift().unwrap();
 
-    let args = match parse_args(argv) {
+    let opts = ~[
+        getopts::optflag("h", "help", "Show this help and exit."),
+        getopts::optopt("o", "output", "Output filename.", "FILENAME"),
+        getopts::optflag("", "header", "Output head to put before highlighted code."),
+        getopts::optflag("", "html", "Output HTML code."),
+        getopts::optflag("", "json", "Output JSON code."),
+        getopts::optmulti("v", "var", "Set backend-specific variables.", "KEY=VAL"),
+    ];
+
+    let args = match parse_args(argv, opts) {
         Ok(args) => args,
         Err(msg) => {
-            print_usage(program);
+            print_usage(program, opts);
             fail!("{}", msg);
         }
     };
 
     if args.show_help {
-        print_usage(program);
+        print_usage(program, opts);
         return;
     }
 
@@ -149,7 +144,13 @@ fn main() {
             ~io::stdin() as ~Reader
         }
     };
-    let src = input.read_to_end().unwrap();
+
+    let src = match input.read_to_end() {
+        Ok(s) => s,
+        Err(f) => {
+            fail!("Read error: {} ({})", f, args.filename.unwrap_or(~"stdin"));
+        }
+    };
     let src = str::from_utf8(src).unwrap();
 
     let parts = core::highlight(src);
