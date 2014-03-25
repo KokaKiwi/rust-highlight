@@ -33,6 +33,8 @@ fn parse_args(argv: &[~str], opts: &[getopts::OptGroup]) -> Result<Args, ~str> {
             Ok(backend::Html)
         } else if matches.opt_present("json") {
             Ok(backend::Json)
+        } else if matches.opt_present("latex") {
+            Ok(backend::Latex)
         } else {
             Ok(backend::Html)
         }
@@ -96,6 +98,7 @@ fn main() {
         getopts::optflag("", "header", "Output head to put before highlighted code."),
         getopts::optflag("", "html", "Output HTML code."),
         getopts::optflag("", "json", "Output JSON code."),
+        getopts::optflag("", "latex", "Output LaTeX code."),
         getopts::optmulti("v", "var", "Set backend-specific variables.", "KEY=VAL"),
     ];
 

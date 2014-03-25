@@ -4,10 +4,12 @@ use collections::HashMap;
 
 pub mod html;
 pub mod json;
+pub mod latex;
 
 pub enum BackendType {
     Html,
     Json,
+    Latex,
 }
 
 pub trait Backend {
@@ -27,5 +29,6 @@ pub fn new_backend(ty: BackendType) -> ~Backend {
     match ty {
         Html => ~html::HtmlBackend::new() as ~Backend,
         Json => ~json::JsonBackend::new() as ~Backend,
+        Latex => ~latex::LatexBackend::new() as ~Backend,
     }
 }
