@@ -1,3 +1,4 @@
+// Taken and modified from https://github.com/mozilla/rust/blob/master/src/librustdoc/html/highlight.rs
 use std::io::IoResult;
 use std::str;
 
