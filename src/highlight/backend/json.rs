@@ -4,6 +4,7 @@ use collections::HashMap;
 use serialize::{json, Encodable, Encoder};
 
 use backend::Backend;
+use colors;
 
 pub struct JsonBackend {
     pretty: bool,
@@ -44,7 +45,17 @@ impl Backend for JsonBackend {
         Ok(())
     }
 
-    fn header(&mut self, _w: &mut Writer) -> IoResult<()> {
+    fn header(&mut self, w: &mut Writer) -> IoResult<()> {
+        let colors = colors::get_colors();
+
+        if self.pretty {
+            let mut encoder = json::PrettyEncoder::new(w);
+            colors.encode(&mut encoder);
+        } else {
+            let mut encoder = json::Encoder::new(w);
+            colors.encode(&mut encoder);
+        }
+
         Ok(())
     }
 
