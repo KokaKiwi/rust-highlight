@@ -1,5 +1,6 @@
 # Build stuff
 /.rust
+/lib
 /rshighlight
 
 # Misc stuff
