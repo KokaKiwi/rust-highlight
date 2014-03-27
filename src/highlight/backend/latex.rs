@@ -5,11 +5,15 @@ use collections::HashMap;
 use backend::Backend;
 use colors;
 
-pub struct LatexBackend;
+pub struct LatexBackend {
+    priv contexts: Vec<~str>,
+}
 
 impl LatexBackend {
     pub fn new() -> LatexBackend {
-        LatexBackend
+        LatexBackend {
+            contexts: Vec::new(),
+        }
     }
 }
 
@@ -53,25 +57,33 @@ impl Backend for LatexBackend {
     }
 
     fn start(&mut self, w: &mut Writer, ty: &str) -> IoResult<()> {
-        if colors::get_types().contains(&ty.to_owned()) {
-            try!(write!(w, "\\\\textcolor\\{{}\\}\\{", ty));
+        if ty != "comment" {
+            if colors::get_types().contains(&ty.to_owned()) {
+                try!(write!(w, "\\\\textcolor\\{{}\\}\\{", ty));
+            }
+
+            if ty == "attribute" {
+                try!(w.write_str("#"));
+            }
         }
 
-        if ty == "attribute" {
-            try!(w.write_str("#"));
-        }
+        self.contexts.push(ty.to_owned());
 
         Ok(())
     }
 
     fn end(&mut self, w: &mut Writer, ty: &str) -> IoResult<()> {
-        if ty == "attribute" {
-            try!(w.write_str("]"));
+        if ty != "comment" {
+            if ty == "attribute" {
+                try!(w.write_str("]"));
+            }
+
+            if colors::get_types().contains(&ty.to_owned()) {
+                try!(w.write_str("}"));
+            }
         }
 
-        if colors::get_types().contains(&ty.to_owned()) {
-            try!(w.write_str("}"));
-        }
+        self.contexts.pop();
 
         Ok(())
     }
@@ -104,8 +116,51 @@ impl Backend for LatexBackend {
 
             result
         }
-        let text = escape_latex(text);
 
+        fn escape_comment(text: &str, has_color: bool) -> ~str {
+            let mut result = ~"";
+
+            let mut first = true;
+            for line in text.lines() {
+                if !first {
+                    result.push_str("\n");
+                }
+
+                if line.len() > 0 && has_color {
+                    result.push_str("\\textcolor{comment}{");
+                }
+
+                result.push_str(line);
+
+                if line.len() > 0 && has_color {
+                    result.push_str("}");
+                }
+
+                first = false;
+            }
+
+            let old_len = text.len();
+            let text = text.trim_right_chars(&'\n').to_owned();
+            let new_len = text.len();
+
+            range(0, old_len - new_len).advance(|_| {
+                result.push_char('\n');
+
+                true
+            });
+
+            result
+        }
+
+        let context = self.contexts.last().unwrap();
+        let has_color = colors::get_types().contains(context);
+        let context = context.as_slice();
+
+        let text = if context == "comment" {
+            escape_comment(text, has_color)
+        } else {
+            escape_latex(text)
+        };
         try!(w.write_str(text));
 
         Ok(())
