@@ -24,7 +24,7 @@ pub fn highlight(src: &str) -> Vec<Part> {
     parts
 }
 
-fn do_highlight(sess: &parse::ParseSess, lexer: lexer::StringReader, parts: &mut Vec<Part>) {
+fn do_highlight(sess: &parse::ParseSess, mut lexer: lexer::StringReader, parts: &mut Vec<Part>) {
     use syntax::parse::lexer::Reader;
 
     let mut last = BytePos(0);
@@ -35,7 +35,7 @@ fn do_highlight(sess: &parse::ParseSess, lexer: lexer::StringReader, parts: &mut
     loop {
         let next = lexer.next_token();
         let test = if next.tok == t::EOF {
-            lexer.pos.get()
+            lexer.pos
         } else {
             next.sp.lo
         };

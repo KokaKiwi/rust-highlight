@@ -1,6 +1,6 @@
-#[crate_id = "rshighlight#0.1.0"];
-#[crate_type = "bin"];
-#[license = "MIT"];
+#![crate_id = "rshighlight#0.1.0"]
+#![crate_type = "bin"]
+#![license = "MIT"]
 
 extern crate collections;
 extern crate getopts;

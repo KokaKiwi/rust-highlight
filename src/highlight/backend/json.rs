@@ -50,10 +50,10 @@ impl Backend for JsonBackend {
 
         if self.pretty {
             let mut encoder = json::PrettyEncoder::new(w);
-            colors.encode(&mut encoder);
+            try!(colors.encode(&mut encoder));
         } else {
             let mut encoder = json::Encoder::new(w);
-            colors.encode(&mut encoder);
+            try!(colors.encode(&mut encoder));
         }
 
         Ok(())
@@ -66,10 +66,10 @@ impl Backend for JsonBackend {
     fn code_end(&mut self, w: &mut Writer) -> IoResult<()> {
         if self.pretty {
             let mut encoder = json::PrettyEncoder::new(w);
-            self.entries.encode(&mut encoder);
+            try!(self.entries.encode(&mut encoder));
         } else {
             let mut encoder = json::Encoder::new(w);
-            self.entries.encode(&mut encoder);
+            try!(self.entries.encode(&mut encoder));
         }
 
         Ok(())

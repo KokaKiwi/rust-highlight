@@ -1,6 +1,6 @@
-#[crate_id = "highlight#0.1.0"];
-#[crate_type = "dylib"];
-#[license = "MIT"];
+#![crate_id = "highlight#0.1.0"]
+#![crate_type = "dylib"]
+#![license = "MIT"]
 
 extern crate syntax;
 extern crate serialize;
