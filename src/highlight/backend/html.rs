@@ -8,7 +8,7 @@ use colors;
 use backend::Backend;
 
 pub struct HtmlBackend {
-    use_classes: bool,
+    pub use_classes: bool,
 }
 
 impl HtmlBackend {

@@ -6,7 +6,7 @@ use backend::Backend;
 use colors;
 
 pub struct LatexBackend {
-    priv contexts: Vec<~str>,
+    contexts: Vec<~str>,
 }
 
 impl LatexBackend {

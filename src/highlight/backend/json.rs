@@ -7,9 +7,9 @@ use backend::Backend;
 use colors;
 
 pub struct JsonBackend {
-    pretty: bool,
+    pub pretty: bool,
 
-    priv entries: Vec<Entry>,
+    entries: Vec<Entry>,
 }
 
 #[deriving(Encodable)]
