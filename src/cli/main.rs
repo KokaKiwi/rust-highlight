@@ -154,7 +154,7 @@ fn main() {
             fail!("Read error: {} ({})", f, args.filename.unwrap_or(~"stdin"));
         }
     };
-    let src = str::from_utf8(src).unwrap();
+    let src = str::from_utf8(src.as_slice()).unwrap();
 
     let parts = core::highlight(src);
 

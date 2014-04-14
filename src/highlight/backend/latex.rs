@@ -90,7 +90,7 @@ impl Backend for LatexBackend {
 
     fn text(&mut self, w: &mut Writer, text: &str) -> IoResult<()> {
         fn escape_latex(text: &str) -> ~str {
-            let mut result = ~"";
+            let mut result = StrBuf::new();
 
             let mut escape = false;
             for c in text.chars() {
@@ -114,11 +114,11 @@ impl Backend for LatexBackend {
                 }
             }
 
-            result
+            result.into_owned()
         }
 
         fn escape_comment(text: &str, has_color: bool) -> ~str {
-            let mut result = ~"";
+            let mut result = StrBuf::new();
 
             let mut first = true;
             for line in text.lines() {
@@ -149,7 +149,7 @@ impl Backend for LatexBackend {
                 true
             });
 
-            result
+            result.into_owned()
         }
 
         let context = self.contexts.last().unwrap();
