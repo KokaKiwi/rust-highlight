@@ -140,7 +140,7 @@ impl Backend for LatexBackend {
             }
 
             let old_len = text.len();
-            let text = text.trim_right_chars(&'\n').to_owned();
+            let text = text.trim_right_chars('\n').to_owned();
             let new_len = text.len();
 
             range(0, old_len - new_len).advance(|_| {

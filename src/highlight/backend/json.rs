@@ -30,7 +30,7 @@ impl JsonBackend {
 
 impl Backend for JsonBackend {
     fn configure(&mut self, vars: &HashMap<~str, ~str>) -> Result<(), ~str> {
-        match vars.find(&~"pretty") {
+        match vars.find_equiv::<&str>(&"pretty") {
             Some(ref value) => {
                 self.pretty = match from_str(value.as_slice()) {
                     Some(b) => b,
@@ -77,7 +77,7 @@ impl Backend for JsonBackend {
 
     fn start(&mut self, _w: &mut Writer, ty: &str) -> IoResult<()> {
         self.entries.push(Entry {
-            ty: ~"start",
+            ty: "start".into_owned(),
             value: ty.to_owned(),
         });
 
@@ -86,7 +86,7 @@ impl Backend for JsonBackend {
 
     fn end(&mut self, _w: &mut Writer, ty: &str) -> IoResult<()> {
         self.entries.push(Entry {
-            ty: ~"end",
+            ty: "end".into_owned(),
             value: ty.to_owned(),
         });
 
@@ -95,7 +95,7 @@ impl Backend for JsonBackend {
 
     fn text(&mut self, _w: &mut Writer, text: &str) -> IoResult<()> {
         self.entries.push(Entry {
-            ty: ~"text",
+            ty: "text".into_owned(),
             value: text.to_owned(),
         });
 

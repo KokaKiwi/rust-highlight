@@ -31,7 +31,7 @@ fn escape_html(text: &str) -> ~str {
 
 impl Backend for HtmlBackend {
     fn configure(&mut self, vars: &HashMap<~str, ~str>) -> Result<(), ~str> {
-        match vars.find(&~"use_classes") {
+        match vars.find_equiv::<&str>(&"use_classes") {
             Some(value) => {
                 self.use_classes = match from_str(value.as_slice()) {
                     Some(v) => v,

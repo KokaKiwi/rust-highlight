@@ -40,10 +40,11 @@ fn parse_args(argv: &[~str], opts: &[getopts::OptGroup]) -> Result<Args, ~str> {
         }
     }
 
-    let matches = match getopts::getopts(argv, opts) {
+    let argv: Vec<StrBuf> = argv.iter().map(|s| s.to_strbuf()).collect();
+    let matches = match getopts::getopts(argv.as_slice(), opts) {
         Ok(m) => m,
-        Err(f) => {
-            return Err(f.to_err_msg());
+        Err(e) => {
+            return Err(e.to_err_msg().into_owned());
         }
     };
 
@@ -59,7 +60,7 @@ fn parse_args(argv: &[~str], opts: &[getopts::OptGroup]) -> Result<Args, ~str> {
         backend_vars: HashMap::new(),
 
         header: matches.opt_present("header"),
-        output_filename: matches.opt_str("output"),
+        output_filename: matches.opt_str("output").map(|s| s.into_owned()),
         filename: match matches.free.len() {
             0 => None,
             _ => Some(matches.free.get(0).to_owned()),
@@ -68,11 +69,11 @@ fn parse_args(argv: &[~str], opts: &[getopts::OptGroup]) -> Result<Args, ~str> {
 
     for var in matches.opt_strs("var").iter() {
         let value = var.as_slice();
-        let parts: ~[&str] = value.splitn('=', 1).collect();
+        let parts: Vec<&str> = value.splitn('=', 1).collect();
         if parts.len() != 2 {
             return Err(format!("Bad backend variable format: {}", value));
         }
-        let (name, value) = (parts[0], parts[1]);
+        let (name, value) = (parts.get(0), parts.get(1));
         args.backend_vars.insert(name.to_owned(), value.to_owned());
     }
 
@@ -89,8 +90,8 @@ fn print_usage(program: &str, opts: &[getopts::OptGroup]) {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut argv = os::args();
-    let program = argv.shift().unwrap();
+    let argv = os::args();
+    let (program, argv) = (argv.get(0).as_slice(), argv.tail());
 
     let opts = ~[
         getopts::optflag("h", "help", "Show this help and exit."),
@@ -126,10 +127,10 @@ fn main() {
     let mut output = match args.output_filename {
         Some(ref filename) => {
             let path = Path::new(filename.as_slice());
-            ~io::File::create(&path) as ~Writer
+            box io::File::create(&path) as Box<Writer>
         }
         None => {
-            ~io::stdout() as ~Writer
+            box io::stdout() as Box<Writer>
         }
     };
 
@@ -141,17 +142,17 @@ fn main() {
     let mut input = match args.filename {
         Some(ref filename) => {
             let path = Path::new(filename.as_slice());
-            ~io::File::open(&path) as ~Reader
+            box io::File::open(&path) as Box<Reader>
         }
         None => {
-            ~io::stdin() as ~Reader
+            box io::stdin() as Box<Reader>
         }
     };
 
     let src = match input.read_to_end() {
         Ok(s) => s,
         Err(f) => {
-            fail!("Read error: {} ({})", f, args.filename.unwrap_or(~"stdin"));
+            fail!("Read error: {} ({})", f, args.filename.unwrap_or("stdin".into_owned()));
         }
     };
     let src = str::from_utf8(src.as_slice()).unwrap();

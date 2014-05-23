@@ -14,7 +14,7 @@ pub enum Part {
 pub fn highlight(src: &str) -> Vec<Part> {
 
     let sess = parse::new_parse_sess();
-    let fm = parse::string_to_filemap(&sess, src.to_owned(), ~"<stdin>");
+    let fm = parse::string_to_filemap(&sess, src.into_strbuf(), "<stdin>".into_strbuf());
 
     let mut parts = Vec::new();
     do_highlight(&sess,
@@ -46,12 +46,12 @@ fn do_highlight(sess: &parse::ParseSess, mut lexer: lexer::StringReader, parts: 
                 hi: test,
                 expn_info: None,
             }).unwrap();
-            let ty = if snip.contains("/") {
-                ~"comment"
+            let ty = if snip.as_slice().contains("/") {
+                "comment".into_owned()
             } else {
-                ~"normal"
+                "normal".into_owned()
             };
-            let part = Text(ty, snip);
+            let part = Text(ty, snip.into_owned());
             parts.push(part);
         }
         last = next.sp.hi;
@@ -95,13 +95,13 @@ fn do_highlight(sess: &parse::ParseSess, mut lexer: lexer::StringReader, parts: 
             // span when we see the ']'.
             t::POUND => {
                 is_attribute = true;
-                parts.push(Start(~"attribute"));
+                parts.push(Start("attribute".into_owned()));
                 continue
             }
             t::RBRACKET => {
                 if is_attribute {
                     is_attribute = false;
-                    parts.push(End(~"attribute"));
+                    parts.push(End("attribute".into_owned()));
                     continue
                 } else {
                     ""
@@ -148,7 +148,7 @@ fn do_highlight(sess: &parse::ParseSess, mut lexer: lexer::StringReader, parts: 
         let ty = ty.to_owned();
 
         let snip = sess.span_diagnostic.cm.span_to_snippet(next.sp).unwrap();
-        let part = Text(ty, snip);
+        let part = Text(ty, snip.into_owned());
         parts.push(part);
     }
 }
